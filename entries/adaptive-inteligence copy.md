@@ -1,7 +1,6 @@
 ---
 title: "Beyond the Resume: The One Skill Hiring Managers Are Actually Looking For"
 date: 2023-10-27
-category: Career Development
 tags: [career, soft skills, leadership, future of work]
 author: Admin
 ---

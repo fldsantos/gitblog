@@ -1,7 +1,6 @@
 ---
 title: "Why 'Slow Mornings' Are the Productivity Hack You Didn't Know You Needed"
 date: 2023-10-27
-category: Wellness
 tags: [mental health, routine, slow living, mindfulness]
 author: Admin
 ---

@@ -1,7 +1,6 @@
 ---
 title: "The Art of Digital Feng Shui: Reclaiming Your Screen Real Estate"
 date: 2023-10-27
-category: Productivity
 tags: [organization, minimalisim, focus, work-life-balance]
 author: Admin
 ---
