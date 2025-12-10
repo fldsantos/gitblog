@@ -108,6 +108,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
+          publish_branch: pages
           force_orphan: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
@@ -117,10 +118,10 @@ jobs:
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         run: |
           echo "=== Deployment Summary ==="
-          echo "Files were deployed to the gh-pages branch"
+          echo "Files were deployed to the pages branch"
           echo "Your site should be available at:"
           echo "https://${{ github.repository_owner }}.github.io/gitblog/"
           echo ""
           echo "Note: The _site folder is not committed to the main branch"
-          echo "It is built during the workflow and deployed to gh-pages branch"
+          echo "It is built during the workflow and deployed to pages branch"
 

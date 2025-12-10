@@ -61,9 +61,9 @@ Your markdown content here...
 
 **Important:** The `_site/` folder is **NOT** committed to your main branch (it's in `.gitignore`). 
 - The files are built **during the GitHub Actions workflow**
-- They are deployed to the `gh-pages` branch automatically
+- They are deployed to the `pages` branch automatically
 - Your live site is available at: `https://[your-username].github.io/gitblog/`
-- To see the built files, check the `gh-pages` branch or view your GitHub Pages site
+- To see the built files, check the `pages` branch or view your GitHub Pages site
 
 ## GitHub Pages Setup
 
@@ -78,7 +78,7 @@ Your markdown content here...
    - Navigate to **Pages**
    - Under "Source", select **"GitHub Actions"** (NOT "Deploy from a branch")
    - If you see "Deploy from a branch" selected, change it to "GitHub Actions"
-   - The workflow will automatically deploy to the `gh-pages` branch on every push to main/master
+   - The workflow will automatically deploy to the `pages` branch on every push to main/master
    - **Important:** After the first successful workflow run, wait a few minutes for GitHub Pages to update
 
 **Note:** If you get a permission error, make sure step 1 is completed first!
@@ -86,7 +86,7 @@ Your markdown content here...
 **If your site shows README.md instead of the blog:**
 - Make sure "Source" is set to **"GitHub Actions"** (not "Deploy from a branch")
 - Check that the workflow has completed successfully (go to Actions tab)
-- Verify the `gh-pages` branch exists and contains your HTML files
+- Verify the `pages` branch exists and contains your HTML files
 - Wait 1-2 minutes after deployment for GitHub Pages to update
 
 ## Troubleshooting
@@ -95,13 +95,13 @@ Your markdown content here...
 
 **This is normal!** The `_site/` folder is in `.gitignore` and won't appear in your main branch. The files are:
 - Built during the GitHub Actions workflow
-- Deployed to the `gh-pages` branch (check your branches to see it)
+- Deployed to the `pages` branch (check your branches to see it)
 - Served via GitHub Pages at your site URL
 
 To verify the build worked:
 1. Check the workflow logs in the **Actions** tab
 2. Look for the "Verify build output" step - it will show all created files
-3. Check the `gh-pages` branch in your repository
+3. Check the `pages` branch in your repository
 4. Visit your GitHub Pages URL: `https://[your-username].github.io/gitblog/`
 
 ### No static HTML pages created
@@ -131,8 +131,8 @@ If the workflow runs but no pages appear:
    ```
    You should see `index.html` and entry HTML files in the `_site/` folder.
 
-5. **Check the gh-pages branch:**
-   - After a successful workflow run, a `gh-pages` branch should be created
+5. **Check the pages branch:**
+   - After a successful workflow run, a `pages` branch should be created
    - Go to your repository → **Branches** to see if it exists
    - The branch should contain the static HTML files
 

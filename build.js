@@ -206,19 +206,7 @@ function buildMainPage(entries) {
     })));
     template = template.replace(/\{\{ENTRIES_JSON\}\}/g, entriesJson);
     
-    // Generate tag filter buttons (escape HTML)
-    const allTags = [...new Set(entries.flatMap(e => e.tags))].sort();
-    const tagButtons = allTags.map(tag => {
-        const escapedTag = escapeHtml(tag);
-        return `
-        <button onclick="filterByTag('${escapedTag.replace(/'/g, "\\'")}')" 
-                class="tag-filter px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors">
-            ${escapedTag}
-        </button>
-    `;
-    }).join('');
-    
-    template = template.replace('<!-- Tags will be populated by build script -->', tagButtons);
+    // Tags are now populated dynamically via JavaScript dropdown, no need to generate buttons
     
     fs.writeFileSync(path.join(outputDir, 'index.html'), template);
 }
@@ -436,4 +424,3 @@ function build() {
 }
 
 build();
-
