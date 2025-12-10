@@ -59,6 +59,12 @@ Your markdown content here...
    - No server-side processing needed
    - Pure client-side JavaScript for search and filtering
 
+**Important:** The `_site/` folder is **NOT** committed to your main branch (it's in `.gitignore`). 
+- The files are built **during the GitHub Actions workflow**
+- They are deployed to the `gh-pages` branch automatically
+- Your live site is available at: `https://[your-username].github.io/gitblog/`
+- To see the built files, check the `gh-pages` branch or view your GitHub Pages site
+
 ## GitHub Pages Setup
 
 1. **Enable GitHub Actions Permissions:**
@@ -76,6 +82,19 @@ Your markdown content here...
 **Note:** If you get a permission error, make sure step 1 is completed first!
 
 ## Troubleshooting
+
+### _site folder not appearing in repository
+
+**This is normal!** The `_site/` folder is in `.gitignore` and won't appear in your main branch. The files are:
+- Built during the GitHub Actions workflow
+- Deployed to the `gh-pages` branch (check your branches to see it)
+- Served via GitHub Pages at your site URL
+
+To verify the build worked:
+1. Check the workflow logs in the **Actions** tab
+2. Look for the "Verify build output" step - it will show all created files
+3. Check the `gh-pages` branch in your repository
+4. Visit your GitHub Pages URL: `https://[your-username].github.io/gitblog/`
 
 ### No static HTML pages created
 

@@ -164,6 +164,7 @@ function cleanupOrphanedEntries(entries) {
 function build() {
     try {
         console.log('Building blog...');
+        console.log(`Working directory: ${__dirname}`);
         
         // Check if entries directory exists
         if (!fs.existsSync(entriesDir)) {
@@ -183,27 +184,61 @@ function build() {
             process.exit(1);
         }
         
+        console.log(`Entries directory: ${entriesDir}`);
+        console.log(`Templates directory: ${templatesDir}`);
+        console.log(`Output directory: ${outputDir}`);
+        
         const entries = getAllEntries();
         console.log(`Found ${entries.length} entries`);
         
         if (entries.length === 0) {
             console.warn('WARNING: No entries found!');
+        } else {
+            entries.forEach(entry => {
+                console.log(`  - ${entry.filename}.md -> ${entry.url}`);
+            });
         }
         
+        // Ensure output directory exists
+        if (!fs.existsSync(outputDir)) {
+            console.log(`Creating output directory: ${outputDir}`);
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+        
+        console.log('Building main page...');
         buildMainPage(entries);
+        
+        console.log('Building entry pages...');
         buildEntryPages(entries);
         
         // Clean up orphaned entry HTML files
+        console.log('Cleaning up orphaned entries...');
         cleanupOrphanedEntries(entries);
         
         // Verify output
-        const indexExists = fs.existsSync(path.join(outputDir, 'index.html'));
-        console.log(`Index page created: ${indexExists}`);
-        console.log(`Entry pages created: ${entries.length}`);
+        console.log('\n=== Build Verification ===');
+        const indexPath = path.join(outputDir, 'index.html');
+        const indexExists = fs.existsSync(indexPath);
+        console.log(`Index page: ${indexExists ? '✓ Created' : '✗ Missing'} (${indexPath})`);
         
-        console.log('Build complete!');
+        if (indexExists) {
+            const stats = fs.statSync(indexPath);
+            console.log(`Index page size: ${stats.size} bytes`);
+        }
+        
+        const entryFiles = fs.readdirSync(outputDir).filter(f => f.startsWith('entry-') && f.endsWith('.html'));
+        console.log(`Entry pages: ${entryFiles.length} file(s) created`);
+        entryFiles.forEach(file => {
+            const filePath = path.join(outputDir, file);
+            const stats = fs.statSync(filePath);
+            console.log(`  - ${file} (${stats.size} bytes)`);
+        });
+        
+        console.log('\nBuild complete!');
     } catch (error) {
-        console.error('Build failed:', error);
+        console.error('\n=== BUILD FAILED ===');
+        console.error('Error:', error.message);
+        console.error('Stack:', error.stack);
         process.exit(1);
     }
 }

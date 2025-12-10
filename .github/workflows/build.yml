@@ -27,13 +27,38 @@ jobs:
 
       - name: Build blog
         run: node build.js
+        continue-on-error: false
 
       - name: Verify build output
         run: |
-          echo "Checking _site directory..."
-          ls -la _site/ || echo "ERROR: _site directory not found!"
-          echo "Files in _site:"
-          find _site -type f || echo "ERROR: No files found in _site!"
+          echo "=== Checking _site directory ==="
+          if [ ! -d "_site" ]; then
+            echo "ERROR: _site directory does not exist!"
+            exit 1
+          fi
+          
+          echo "=== Directory contents ==="
+          ls -la _site/
+          
+          echo "=== All files in _site ==="
+          find _site -type f
+          
+          echo "=== File count ==="
+          find _site -type f | wc -l
+          
+          echo "=== Checking for index.html ==="
+          if [ -f "_site/index.html" ]; then
+            echo "✓ index.html exists"
+            ls -lh _site/index.html
+          else
+            echo "ERROR: index.html not found!"
+            exit 1
+          fi
+          
+          echo "=== Checking for entry HTML files ==="
+          ENTRY_COUNT=$(find _site -name "entry-*.html" | wc -l)
+          echo "Found $ENTRY_COUNT entry HTML file(s)"
+          find _site -name "entry-*.html" || echo "No entry files found"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -44,4 +69,15 @@ jobs:
           force_orphan: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
+        
+      - name: Deployment summary
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          echo "=== Deployment Summary ==="
+          echo "Files were deployed to the gh-pages branch"
+          echo "Your site should be available at:"
+          echo "https://${{ github.repository_owner }}.github.io/gitblog/"
+          echo ""
+          echo "Note: The _site folder is not committed to the main branch"
+          echo "It is built during the workflow and deployed to gh-pages branch"
 
