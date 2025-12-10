@@ -61,10 +61,19 @@ Your markdown content here...
 
 ## GitHub Pages Setup
 
-1. Go to your repository Settings
-2. Navigate to Pages
-3. Select "GitHub Actions" as the source
-4. The workflow will automatically deploy on every push to main/master
+1. **Enable GitHub Actions Permissions:**
+   - Go to your repository Settings
+   - Navigate to **Actions** → **General**
+   - Under "Workflow permissions", select **"Read and write permissions"**
+   - Click **Save**
+
+2. **Configure GitHub Pages:**
+   - Go to your repository Settings
+   - Navigate to **Pages**
+   - Under "Source", select **"GitHub Actions"**
+   - The workflow will automatically deploy on every push to main/master
+
+**Note:** If you get a permission error, make sure step 1 is completed first!
 
 ## Project Structure
 
