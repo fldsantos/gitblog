@@ -130,6 +130,36 @@ function buildEntryPages(entries) {
     });
 }
 
+// Clean up orphaned entry HTML files (files without corresponding markdown)
+function cleanupOrphanedEntries(entries) {
+    if (!fs.existsSync(outputDir)) {
+        return;
+    }
+    
+    // Get all HTML files in _site that match entry-*.html pattern
+    const existingFiles = fs.readdirSync(outputDir).filter(file => 
+        file.startsWith('entry-') && file.endsWith('.html')
+    );
+    
+    // Create a set of expected HTML filenames from current entries
+    const expectedFiles = new Set(entries.map(e => e.url));
+    
+    // Find and delete orphaned files
+    let deletedCount = 0;
+    existingFiles.forEach(file => {
+        if (!expectedFiles.has(file)) {
+            const filePath = path.join(outputDir, file);
+            fs.unlinkSync(filePath);
+            console.log(`Deleted orphaned entry: ${file}`);
+            deletedCount++;
+        }
+    });
+    
+    if (deletedCount > 0) {
+        console.log(`Cleaned up ${deletedCount} orphaned entry file(s)`);
+    }
+}
+
 // Main build function
 function build() {
     try {
@@ -162,6 +192,9 @@ function build() {
         
         buildMainPage(entries);
         buildEntryPages(entries);
+        
+        // Clean up orphaned entry HTML files
+        cleanupOrphanedEntries(entries);
         
         // Verify output
         const indexExists = fs.existsSync(path.join(outputDir, 'index.html'));
