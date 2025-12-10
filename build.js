@@ -2,6 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { marked } = require('marked');
 
+// Configure marked for better markdown rendering
+marked.setOptions({
+    breaks: true,  // Convert line breaks to <br>
+    gfm: true,     // GitHub Flavored Markdown
+    headerIds: true, // Add IDs to headers
+    mangle: false  // Don't mangle email addresses
+});
+
 // Configuration
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 const entriesDir = path.join(__dirname, 'entries');
@@ -19,7 +27,7 @@ function parseMarkdownFile(filePath) {
         throw new Error(`File not found: ${filePath}`);
     }
     
-    const content = fs.readFileSync(filePath, 'utf8');
+    let content = fs.readFileSync(filePath, 'utf8');
     
     if (!content || content.trim().length === 0) {
         throw new Error('File is empty');
@@ -27,44 +35,97 @@ function parseMarkdownFile(filePath) {
     
     const lines = content.split('\n');
     
-    // Extract title (first # heading)
+    // Check for frontmatter (YAML between --- markers)
+    let frontmatter = null;
+    let contentStart = 0;
+    let tags = [];
     let title = '';
-    let titleIndex = -1;
-    for (let i = 0; i < lines.length; i++) {
-        const trimmed = lines[i].trim();
-        if (trimmed.startsWith('# ')) {
-            title = trimmed.substring(2).trim();
-            titleIndex = i;
-            break;
+    
+    if (lines[0] && lines[0].trim() === '---') {
+        // Find the closing ---
+        let frontmatterEnd = -1;
+        for (let i = 1; i < lines.length; i++) {
+            if (lines[i].trim() === '---') {
+                frontmatterEnd = i;
+                break;
+            }
+        }
+        
+        if (frontmatterEnd > 0) {
+            // Parse frontmatter
+            const frontmatterLines = lines.slice(1, frontmatterEnd);
+            frontmatter = {};
+            frontmatterLines.forEach(line => {
+                const match = line.match(/^(\w+):\s*(.+)$/);
+                if (match) {
+                    const key = match[1].toLowerCase();
+                    let value = match[2].trim();
+                    
+                    // Handle array values (tags: [a, b, c])
+                    if (value.startsWith('[') && value.endsWith(']')) {
+                        value = value.slice(1, -1).split(',').map(v => v.trim().replace(/['"]/g, ''));
+                    }
+                    
+                    frontmatter[key] = value;
+                }
+            });
+            
+            // Extract tags from frontmatter
+            if (frontmatter.tags) {
+                if (Array.isArray(frontmatter.tags)) {
+                    tags = frontmatter.tags;
+                } else {
+                    tags = frontmatter.tags.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                }
+            }
+            
+            // Extract title from frontmatter
+            if (frontmatter.title) {
+                title = frontmatter.title;
+            }
+            
+            contentStart = frontmatterEnd + 1;
         }
     }
     
+    // Get markdown content (skip frontmatter if present)
+    const markdownContent = lines.slice(contentStart).join('\n').trim();
+    
+    // Extract title from first # heading if not in frontmatter
     if (!title) {
-        // Fallback to filename if no title found
+        for (let i = 0; i < lines.length; i++) {
+            const trimmed = lines[i].trim();
+            if (trimmed.startsWith('# ')) {
+                title = trimmed.substring(2).trim();
+                break;
+            }
+        }
+    }
+    
+    // If still no title, use filename
+    if (!title) {
         title = path.basename(filePath, '.md');
     }
     
-    // Extract tags (look for tags: line after title)
-    let tags = [];
-    let contentStart = titleIndex >= 0 ? titleIndex + 1 : 0;
-    
-    // Check for tags line (must be right after title)
-    if (titleIndex >= 0 && titleIndex + 1 < lines.length) {
-        const tagsLine = lines[titleIndex + 1].trim();
-        if (tagsLine.toLowerCase().startsWith('tags:')) {
-            const tagsStr = tagsLine.substring(5).trim();
-            if (tagsStr) {
-                tags = tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
+    // Extract tags from markdown if not in frontmatter (old format: tags: tag1, tag2)
+    if (tags.length === 0) {
+        for (let i = 0; i < lines.length; i++) {
+            const trimmed = lines[i].trim();
+            if (trimmed.toLowerCase().startsWith('tags:')) {
+                const tagsStr = trimmed.substring(5).trim();
+                if (tagsStr) {
+                    tags = tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                }
+                break;
             }
-            contentStart = titleIndex + 2;
         }
     }
     
-    // Get content (everything after title and tags)
-    const entryContent = lines.slice(contentStart).join('\n').trim();
+    // Use the full markdown content (including the title heading)
+    const entryContent = markdownContent;
     
     if (!entryContent) {
-        throw new Error('No content found after title/tags');
+        throw new Error('No content found after frontmatter/title');
     }
     
     return {
