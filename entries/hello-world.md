@@ -1,11 +1,17 @@
 # Hello World
-Tags: intro, welcome, sample
 
-This is a sample post generated with the starter.
+tags: introduction, welcome
 
-- Write your posts in Markdown inside the `entries` folder.
-- The first `#` heading becomes the title.
-- Add a `Tags:` line (comma separated) anywhere near the top to categorize.
+This is my first blog entry! Welcome to my blog.
 
-Happy blogging!
+## What is this?
+
+This is a simple blogging engine powered by GitHub Actions.
+
+## Features
+
+- Markdown support
+- Tag filtering
+- Search functionality
+- Dark mode design
 

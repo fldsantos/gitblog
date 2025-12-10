@@ -1,6 +1,7 @@
 {
-  "ownerName": "Your Name",
-  "ownerImage": "https://avatars.githubusercontent.com/u/583231?v=4",
-  "tagline": "Welcome to my GitHub Pages blog powered by Markdown."
+  "owner": {
+    "name": "Your Name",
+    "picture": "https://via.placeholder.com/150"
+  }
 }
 

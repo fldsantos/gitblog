@@ -1,14 +1,14 @@
 {
   "name": "gitblog",
   "version": "1.0.0",
-  "description": "Markdown-driven GitHub Pages blog.",
-  "type": "module",
+  "description": "GitHub Actions powered blog",
+  "main": "build.js",
   "scripts": {
-    "build": "node scripts/build.js",
-    "serve": "npx http-server -c-1 -p 4173 ."
+    "build": "node build.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT"
+  "dependencies": {
+    "marked": "^9.1.0"
+  },
+  "devDependencies": {}
 }
 
