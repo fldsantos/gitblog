@@ -162,7 +162,7 @@ function buildMainPage(entries) {
     fs.writeFileSync(path.join(outputDir, 'index.html'), template);
 }
 
-// Build entry pages
+// Build entry pages (kept for backward compatibility, but now done inline in build function)
 function buildEntryPages(entries) {
     entries.forEach(entry => {
         let template = fs.readFileSync(path.join(templatesDir, 'entry.html'), 'utf8');
@@ -233,11 +233,33 @@ function build() {
     try {
         console.log('Building blog...');
         console.log(`Working directory: ${__dirname}`);
+        console.log(`Current working directory: ${process.cwd()}`);
         
         // Check if entries directory exists
         if (!fs.existsSync(entriesDir)) {
             console.error(`ERROR: Entries directory not found: ${entriesDir}`);
+            console.error(`Absolute path: ${path.resolve(entriesDir)}`);
+            console.error('Current directory contents:');
+            try {
+                fs.readdirSync(__dirname).forEach(file => console.error(`  - ${file}`));
+            } catch (e) {
+                console.error(`Cannot read directory: ${e.message}`);
+            }
             process.exit(1);
+        }
+        
+        // List entries directory contents
+        console.log(`\nEntries directory exists: ${entriesDir}`);
+        console.log('Contents of entries directory:');
+        try {
+            const entriesContents = fs.readdirSync(entriesDir);
+            entriesContents.forEach(file => {
+                const filePath = path.join(entriesDir, file);
+                const stats = fs.statSync(filePath);
+                console.log(`  ${stats.isDirectory() ? 'DIR' : 'FILE'}: ${file} (${stats.size} bytes)`);
+            });
+        } catch (e) {
+            console.error(`Error reading entries directory: ${e.message}`);
         }
         
         // Check if templates directory exists
@@ -252,9 +274,10 @@ function build() {
             process.exit(1);
         }
         
-        console.log(`Entries directory: ${entriesDir}`);
-        console.log(`Templates directory: ${templatesDir}`);
-        console.log(`Output directory: ${outputDir}`);
+        console.log(`\nDirectories:`);
+        console.log(`  Entries: ${entriesDir}`);
+        console.log(`  Templates: ${templatesDir}`);
+        console.log(`  Output: ${outputDir}`);
         
         const entries = getAllEntries();
         console.log(`\n=== Summary ===`);
@@ -277,13 +300,47 @@ function build() {
         }
         
         console.log('\n=== Building Pages ===');
-        console.log('Building main page...');
-        buildMainPage(entries);
-        console.log('✓ Main page built');
+        console.log(`Building main page with ${entries.length} entries...`);
+        try {
+            buildMainPage(entries);
+            const indexPath = path.join(outputDir, 'index.html');
+            if (fs.existsSync(indexPath)) {
+                const stats = fs.statSync(indexPath);
+                console.log(`✓ Main page built: index.html (${stats.size} bytes)`);
+            } else {
+                throw new Error('index.html was not created!');
+            }
+        } catch (error) {
+            console.error('✗ Failed to build main page:', error.message);
+            throw error;
+        }
         
-        console.log('Building entry pages...');
-        buildEntryPages(entries);
-        console.log(`✓ Built ${entries.length} entry page(s)`);
+        console.log(`\nBuilding ${entries.length} entry page(s)...`);
+        try {
+            buildEntryPages(entries);
+            
+            // Verify all files were created
+            let builtCount = 0;
+            entries.forEach(entry => {
+                const outputPath = path.join(outputDir, entry.url);
+                if (fs.existsSync(outputPath)) {
+                    const stats = fs.statSync(outputPath);
+                    console.log(`  ✓ ${entry.url} (${stats.size} bytes)`);
+                    builtCount++;
+                } else {
+                    console.error(`  ✗ Missing: ${entry.url}`);
+                }
+            });
+            
+            console.log(`\n✓ Built ${builtCount}/${entries.length} entry page(s)`);
+            
+            if (builtCount !== entries.length) {
+                throw new Error(`Only built ${builtCount} out of ${entries.length} entry pages!`);
+            }
+        } catch (error) {
+            console.error('✗ Failed to build entry pages:', error.message);
+            throw error;
+        }
         
         // Clean up orphaned entry HTML files
         console.log('Cleaning up orphaned entries...');

@@ -25,6 +25,48 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Verify repository structure
+        run: |
+          echo "=== Repository Structure ==="
+          echo "Current directory:"
+          pwd
+          echo ""
+          echo "Directory contents:"
+          ls -la
+          echo ""
+          echo "=== Checking entries folder ==="
+          if [ -d "entries" ]; then
+            echo "✓ entries directory exists"
+            echo "Files in entries:"
+            ls -la entries/ || echo "ERROR: Cannot list entries directory"
+            echo ""
+            echo "Markdown files count:"
+            find entries -name "*.md" -type f | wc -l
+            echo ""
+            echo "All .md files:"
+            find entries -name "*.md" -type f || echo "No .md files found"
+          else
+            echo "ERROR: entries directory does not exist!"
+            exit 1
+          fi
+          echo ""
+          echo "=== Checking templates folder ==="
+          if [ -d "templates" ]; then
+            echo "✓ templates directory exists"
+            ls -la templates/
+          else
+            echo "ERROR: templates directory does not exist!"
+            exit 1
+          fi
+          echo ""
+          echo "=== Checking config.json ==="
+          if [ -f "config.json" ]; then
+            echo "✓ config.json exists"
+          else
+            echo "ERROR: config.json does not exist!"
+            exit 1
+          fi
+
       - name: Build blog
         run: node build.js
         continue-on-error: false
