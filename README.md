@@ -75,6 +75,44 @@ Your markdown content here...
 
 **Note:** If you get a permission error, make sure step 1 is completed first!
 
+## Troubleshooting
+
+### No static HTML pages created
+
+If the workflow runs but no pages appear:
+
+1. **Check the workflow logs:**
+   - Go to your repository → **Actions** tab
+   - Click on the latest workflow run
+   - Check each step for errors
+   - Look for the "Verify build output" step to see if files were created
+
+2. **Verify your branch name:**
+   - The workflow only runs on `main` or `master` branches
+   - Make sure you're pushing to the correct branch
+
+3. **Check GitHub Pages settings:**
+   - Go to Settings → Pages
+   - Make sure "Source" is set to **"GitHub Actions"** (not "Deploy from a branch")
+   - If it was previously set to a branch, change it to "GitHub Actions"
+
+4. **Verify the build works locally:**
+   ```bash
+   npm install
+   npm run build
+   ls -la _site/
+   ```
+   You should see `index.html` and entry HTML files in the `_site/` folder.
+
+5. **Check the gh-pages branch:**
+   - After a successful workflow run, a `gh-pages` branch should be created
+   - Go to your repository → **Branches** to see if it exists
+   - The branch should contain the static HTML files
+
+6. **Manual workflow trigger:**
+   - Go to **Actions** → **Build Blog** → **Run workflow**
+   - This will manually trigger the build process
+
 ## Project Structure
 
 ```

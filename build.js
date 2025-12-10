@@ -132,15 +132,47 @@ function buildEntryPages(entries) {
 
 // Main build function
 function build() {
-    console.log('Building blog...');
-    
-    const entries = getAllEntries();
-    console.log(`Found ${entries.length} entries`);
-    
-    buildMainPage(entries);
-    buildEntryPages(entries);
-    
-    console.log('Build complete!');
+    try {
+        console.log('Building blog...');
+        
+        // Check if entries directory exists
+        if (!fs.existsSync(entriesDir)) {
+            console.error(`ERROR: Entries directory not found: ${entriesDir}`);
+            process.exit(1);
+        }
+        
+        // Check if templates directory exists
+        if (!fs.existsSync(templatesDir)) {
+            console.error(`ERROR: Templates directory not found: ${templatesDir}`);
+            process.exit(1);
+        }
+        
+        // Check if config exists
+        if (!fs.existsSync('config.json')) {
+            console.error('ERROR: config.json not found!');
+            process.exit(1);
+        }
+        
+        const entries = getAllEntries();
+        console.log(`Found ${entries.length} entries`);
+        
+        if (entries.length === 0) {
+            console.warn('WARNING: No entries found!');
+        }
+        
+        buildMainPage(entries);
+        buildEntryPages(entries);
+        
+        // Verify output
+        const indexExists = fs.existsSync(path.join(outputDir, 'index.html'));
+        console.log(`Index page created: ${indexExists}`);
+        console.log(`Entry pages created: ${entries.length}`);
+        
+        console.log('Build complete!');
+    } catch (error) {
+        console.error('Build failed:', error);
+        process.exit(1);
+    }
 }
 
 build();

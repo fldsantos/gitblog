@@ -28,6 +28,13 @@ jobs:
       - name: Build blog
         run: node build.js
 
+      - name: Verify build output
+        run: |
+          echo "Checking _site directory..."
+          ls -la _site/ || echo "ERROR: _site directory not found!"
+          echo "Files in _site:"
+          find _site -type f || echo "ERROR: No files found in _site!"
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
@@ -35,4 +42,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
           force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 
