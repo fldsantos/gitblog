@@ -111,6 +111,7 @@ jobs:
           force_orphan: true
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
+          cname: false
         
       - name: Deployment summary
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'

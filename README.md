@@ -76,10 +76,18 @@ Your markdown content here...
 2. **Configure GitHub Pages:**
    - Go to your repository Settings
    - Navigate to **Pages**
-   - Under "Source", select **"GitHub Actions"**
-   - The workflow will automatically deploy on every push to main/master
+   - Under "Source", select **"GitHub Actions"** (NOT "Deploy from a branch")
+   - If you see "Deploy from a branch" selected, change it to "GitHub Actions"
+   - The workflow will automatically deploy to the `gh-pages` branch on every push to main/master
+   - **Important:** After the first successful workflow run, wait a few minutes for GitHub Pages to update
 
 **Note:** If you get a permission error, make sure step 1 is completed first!
+
+**If your site shows README.md instead of the blog:**
+- Make sure "Source" is set to **"GitHub Actions"** (not "Deploy from a branch")
+- Check that the workflow has completed successfully (go to Actions tab)
+- Verify the `gh-pages` branch exists and contains your HTML files
+- Wait 1-2 minutes after deployment for GitHub Pages to update
 
 ## Troubleshooting
 
