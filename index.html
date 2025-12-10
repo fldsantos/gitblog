@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Felipe&#039;s Blog - Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        #tagDropdown {
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #1e293b;
+        }
+        #tagDropdown::-webkit-scrollbar {
+            width: 8px;
+        }
+        #tagDropdown::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        #tagDropdown::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        #tagDropdown::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900 text-slate-200">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <img src="https://www.washingtonpost.com/news/the-intersect/wp-content/uploads/sites/32/2015/01/facebook-person.jpg" alt="Felipe&#039;s Blog" 
+                 class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-2 border-slate-700">
+            <h1 class="text-4xl font-bold mb-2">Felipe&#039;s Blog</h1>
+        </header>
+
+        <!-- Search and Filter -->
+        <div class="mb-8 space-y-4">
+            <div class="relative">
+                <input type="text" id="searchInput" 
+                       placeholder="Search entries..." 
+                       class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-600 text-slate-200">
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Filter Button with Dropdown -->
+                <div class="relative">
+                    <button id="filterButton" 
+                            onclick="toggleDropdown()"
+                            class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors flex items-center gap-2">
+                        <span>Filter by Tags</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="tagDropdown" 
+                         class="hidden absolute top-full left-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+                        <div id="dropdownTagList" class="p-2">
+                            <!-- Tags will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Selected Tags -->
+                <div id="selectedTagsContainer" class="flex flex-wrap gap-2">
+                    <!-- Selected tags will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Entries List -->
+        <div id="entriesList" class="space-y-4">
+            <!-- Entries will be populated by build script -->
+        </div>
+    </div>
+
+    <script>
+        let allEntries = [{"title":"\"Sample Blog Entry\"","tags":["Sample","Entry"],"url":"entry-sample.html","content":"# The title should be the first line in the '#' symbol\n\nThis paragraph introduces the article. Markdown allows you to write using an easy-to-read, easy-to-write plain text format, which then converts "}];
+        let selectedTags = new Set();
+        let allAvailableTags = [];
+
+        // Get all unique tags from entries
+        function getAllTags() {
+            const tagSet = new Set();
+            allEntries.forEach(entry => {
+                entry.tags.forEach(tag => tagSet.add(tag));
+            });
+            return Array.from(tagSet).sort();
+        }
+
+        // Initialize tags
+        function initializeTags() {
+            allAvailableTags = getAllTags();
+            renderDropdown();
+            renderSelectedTags();
+        }
+
+        // Toggle dropdown
+        function toggleDropdown() {
+            const dropdown = document.getElementById('tagDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const filterButton = document.getElementById('filterButton');
+            const dropdown = document.getElementById('tagDropdown');
+            if (!filterButton.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Select a tag from dropdown
+        function selectTag(tag) {
+            selectedTags.add(tag);
+            renderDropdown();
+            renderSelectedTags();
+            applyFilters();
+            // Close dropdown after selection
+            document.getElementById('tagDropdown').classList.add('hidden');
+        }
+
+        // Remove a selected tag
+        function removeTag(tag) {
+            selectedTags.delete(tag);
+            renderDropdown();
+            renderSelectedTags();
+            applyFilters();
+        }
+
+        // Render dropdown with available tags
+        function renderDropdown() {
+            const dropdownList = document.getElementById('dropdownTagList');
+            const availableTags = allAvailableTags.filter(tag => !selectedTags.has(tag));
+            
+            if (availableTags.length === 0) {
+                dropdownList.innerHTML = '<p class="px-3 py-2 text-slate-400 text-sm">All tags selected</p>';
+                return;
+            }
+
+            dropdownList.innerHTML = availableTags.map(tag => `
+                <button onclick="selectTag('${tag.replace(/'/g, "\\'")}')" 
+                        class="w-full text-left px-3 py-2 hover:bg-slate-700 rounded transition-colors text-slate-200">
+                    ${tag}
+                </button>
+            `).join('');
+        }
+
+        // Render selected tags
+        function renderSelectedTags() {
+            const container = document.getElementById('selectedTagsContainer');
+            
+            if (selectedTags.size === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = Array.from(selectedTags).sort().map(tag => `
+                <button onclick="removeTag('${tag.replace(/'/g, "\\'")}')" 
+                        class="px-3 py-1 bg-slate-700 text-slate-200 rounded-full text-sm hover:bg-slate-600 transition-colors flex items-center gap-2">
+                    <span>${tag}</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `).join('');
+        }
+
+        // Apply filters (search + tags)
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            const filtered = allEntries.filter(entry => {
+                // Search filter
+                const matchesSearch = searchTerm === '' || 
+                    entry.title.toLowerCase().includes(searchTerm) ||
+                    entry.content.toLowerCase().includes(searchTerm);
+                
+                // Tag filter (entry must have ALL selected tags)
+                const matchesTags = selectedTags.size === 0 || 
+                    Array.from(selectedTags).every(tag => entry.tags.includes(tag));
+                
+                return matchesSearch && matchesTags;
+            });
+
+            displayEntries(filtered);
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            applyFilters();
+        });
+
+        // Display entries
+        function displayEntries(entries) {
+            const container = document.getElementById('entriesList');
+            if (entries.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-500 py-8">No entries found.</p>';
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => `
+                <a href="${entry.url}" class="block p-6 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-750 hover:border-slate-600 transition-colors">
+                    <h2 class="text-2xl font-semibold mb-2">${entry.title}</h2>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        ${entry.tags.map(tag => `
+                            <span class="px-3 py-1 bg-slate-700 text-slate-300 rounded-full text-sm">${tag}</span>
+                        `).join('')}
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // Initialize on page load
+        initializeTags();
+        displayEntries(allEntries);
+    </script>
+</body>
+</html>
+
