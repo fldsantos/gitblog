@@ -2,7 +2,7 @@
 title: "Building the Ultimate Productive Home Office Setup"
 date: 2023-10-27
 author: "Alex Chen"
-categories: ["Productivity", "Workspace"]
+tags: ["Productivity", "Workspace"]
 ---
 
 # Building the Ultimate Productive Home Office Setup
