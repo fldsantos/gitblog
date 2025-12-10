@@ -1,158 +1,64 @@
-# GitBlog
+# gitblog
 
-A minimalistic, dark-mode blogging engine powered by GitHub Actions.
+**Minimalistic blogging engine powered by GitHub Actions.**
+
+`gitblog` streamlines the process of maintaining a static blog. It allows you to manage your content entirely through your terminal using simple git-like commands, while GitHub Actions handles the heavy lifting of building and deploying your site.
+
+---
 
 ## Features
 
-- ✨ Automatic blog generation from markdown files
-- 🔍 Search functionality
-- 🏷️ Tag filtering
-- 🌙 Dark mode design
-- 🚀 Auto-deploy to GitHub Pages
+* ✨ **Automatic Generation:** seamlessly converts Markdown files into blog posts.
+* 🔍 **Search Functionality:** Built-in search for easy content navigation.
+* 🏷️ **Tag Filtering:** Organize posts with tags for better discoverability.
+* 🚀 **Auto-deploy:** Updates are automatically deployed to GitHub Pages.
 
-## Setup
+---
 
-1. **Update Configuration**
-   - Edit `config.json` with your name and profile picture URL
+## Setup & Installation
 
-2. **Add Blog Entries**
-   - Create markdown files in the `entries/` folder
-   - Each entry should start with a `# Title` heading
-   - Add tags on the line after the title: `tags: tag1, tag2, tag3`
+Follow these steps to get your blog up and running.
 
-3. **Test Locally** (optional)
-   ```bash
-   npm install
-   npm run build
-   ```
-   The generated site will be in the `_site/` folder.
+### 1. Repository Configuration
+Before installing the tools, you must configure a repository on GitHub to host your site.
 
-4. **Push to GitHub**
-   - Push your code to a repository named `gitblog`
-   - The GitHub Actions workflow will automatically build and deploy to GitHub Pages
+1.  **Create a new repository** in your GitHub account.
+2.  Navigate to your repository **Settings**.
+3.  Go to **Pages** > **Workflow Permissions**.
+    > **Important:** Select **Read and Write permissions**. This is required for the action to publish your site.
+4.  Go to **Pages** > **Build and deployment**.
+5.  Under "Source", select **GitHub Actions**.
 
-## Entry Format
+### 2. Install the CLI Tool
+To use the custom `git blog` commands, you need to install the shell script.
 
-Each markdown file in `entries/` should follow this format:
+1.  Locate the file `installation-bash-script.txt` in this repository.
+2.  Copy the content of the file.
+3.  Paste and run the content in your Terminal.
+4.  Follow installation instructions
 
-```markdown
-# Entry Title
+### 3. Initialize the Blog
+Once the CLI tool is installed:
 
-tags: tag1, tag2, tag3
+1.  Open your terminal.
+2.  Navigate to the folder where you wish to store your blog source files.
+3.  Run the initialization command:
+    ```
+    git blog start
+    ```
+4.  Follow the on-screen instructions to finish the setup.
 
-Your markdown content here...
-```
+---
 
-## How It Works
+## Usage
 
-**Important:** This blog generates **100% static HTML files**. Node.js is only used during the build process in GitHub Actions, not on GitHub Pages.
+Use the following commands to manage your blog content directly from your terminal.
 
-1. **Build Process (GitHub Actions):**
-   - When you push to GitHub, the workflow runs `build.js` (Node.js)
-   - It reads markdown files from `entries/`
-   - Converts markdown to HTML
-   - Populates templates with data
-   - Generates static HTML files in `_site/`
+| Command | Description |
+| :--- | :--- |
+| **`git blog new <filename>`** | Creates a new blog entry (Markdown file). |
+| **`git blog edit <filename>`** | Opens an existing blog entry for editing. |
+| **`git blog delete <filename>`** | Deletes an existing blog entry. |
+| **`git blog update`** | Commits changes and updates the remote GitHub repository, triggering a new build/deploy. |
 
-2. **Deployment (GitHub Pages):**
-   - Only the `_site/` folder (static HTML/CSS/JS) is deployed
-   - No server-side processing needed
-   - Pure client-side JavaScript for search and filtering
-
-**Important:** The `_site/` folder is **NOT** committed to your main branch (it's in `.gitignore`). 
-- The files are built **during the GitHub Actions workflow**
-- They are deployed to the `pages` branch automatically
-- Your live site is available at: `https://[your-username].github.io/gitblog/`
-- To see the built files, check the `pages` branch or view your GitHub Pages site
-
-## GitHub Pages Setup
-
-1. **Enable GitHub Actions Permissions:**
-   - Go to your repository Settings
-   - Navigate to **Actions** → **General**
-   - Under "Workflow permissions", select **"Read and write permissions"**
-   - Click **Save**
-
-2. **Configure GitHub Pages:**
-   - Go to your repository Settings
-   - Navigate to **Pages**
-   - Under "Source", select **"GitHub Actions"** (NOT "Deploy from a branch")
-   - If you see "Deploy from a branch" selected, change it to "GitHub Actions"
-   - The workflow will automatically deploy to the `pages` branch on every push to main/master
-   - **Important:** After the first successful workflow run, wait a few minutes for GitHub Pages to update
-
-**Note:** If you get a permission error, make sure step 1 is completed first!
-
-**If your site shows README.md instead of the blog:**
-- Make sure "Source" is set to **"GitHub Actions"** (not "Deploy from a branch")
-- Check that the workflow has completed successfully (go to Actions tab)
-- Verify the `pages` branch exists and contains your HTML files
-- Wait 1-2 minutes after deployment for GitHub Pages to update
-
-## Troubleshooting
-
-### _site folder not appearing in repository
-
-**This is normal!** The `_site/` folder is in `.gitignore` and won't appear in your main branch. The files are:
-- Built during the GitHub Actions workflow
-- Deployed to the `pages` branch (check your branches to see it)
-- Served via GitHub Pages at your site URL
-
-To verify the build worked:
-1. Check the workflow logs in the **Actions** tab
-2. Look for the "Verify build output" step - it will show all created files
-3. Check the `pages` branch in your repository
-4. Visit your GitHub Pages URL: `https://[your-username].github.io/gitblog/`
-
-### No static HTML pages created
-
-If the workflow runs but no pages appear:
-
-1. **Check the workflow logs:**
-   - Go to your repository → **Actions** tab
-   - Click on the latest workflow run
-   - Check each step for errors
-   - Look for the "Verify build output" step to see if files were created
-
-2. **Verify your branch name:**
-   - The workflow only runs on `main` or `master` branches
-   - Make sure you're pushing to the correct branch
-
-3. **Check GitHub Pages settings:**
-   - Go to Settings → Pages
-   - Make sure "Source" is set to **"GitHub Actions"** (not "Deploy from a branch")
-   - If it was previously set to a branch, change it to "GitHub Actions"
-
-4. **Verify the build works locally:**
-   ```bash
-   npm install
-   npm run build
-   ls -la _site/
-   ```
-   You should see `index.html` and entry HTML files in the `_site/` folder.
-
-5. **Check the pages branch:**
-   - After a successful workflow run, a `pages` branch should be created
-   - Go to your repository → **Branches** to see if it exists
-   - The branch should contain the static HTML files
-
-6. **Manual workflow trigger:**
-   - Go to **Actions** → **Build Blog** → **Run workflow**
-   - This will manually trigger the build process
-
-## Project Structure
-
-```
-gitblog/
-├── .github/
-│   └── workflows/
-│       └── build.yml          # GitHub Actions workflow
-├── entries/                   # Markdown blog entries
-├── templates/                 # HTML templates
-│   ├── index.html            # Main page template
-│   └── entry.html            # Entry page template
-├── config.json               # Blog configuration
-├── build.js                  # Build script
-└── package.json              # Dependencies
-```
-
+---

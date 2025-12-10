@@ -1,0 +1,297 @@
+bash << 'INSTALLER_EOF'
+
+# Git Blog - One-line installer
+# Creating the git-blog script...
+
+cat > /tmp/git-blog << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# git-blog - A custom git command for managing a markdown blog
+# Usage: git blog [start|new|edit|delete] [filename]
+
+set -e
+
+BLOG_DIR="blog"
+ENTRIES_DIR="$BLOG_DIR/entries"
+TEMPLATE_REPO="https://github.com/fldsantos/gitblog/"
+
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+# Helper function to print colored messages
+print_message() {
+    echo -e "${GREEN}✓${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}✗${NC} $1"
+    exit 1
+}
+
+# Function to handle git operations
+git_commit_push() {
+    local message="$1"
+    cd "$BLOG_DIR"
+    git add .
+    git commit -m "$message"
+    git push origin main
+    cd ..
+}
+
+# START: Initialize new blog project
+cmd_start() {
+    if [ -d "$BLOG_DIR" ]; then
+        print_error "Blog directory already exists in this location!"
+    fi
+
+    print_message "Cloning blog template from GitHub..."
+    git clone "$TEMPLATE_REPO" "$BLOG_DIR"
+    
+    cd "$BLOG_DIR"
+    
+    # Install npm dependencies
+    print_message "Installing npm dependencies..."
+    npm install
+    
+    # Remove the existing remote
+    print_message "Removing template remote..."
+    git remote remove origin
+    
+    # Ensure we're on main branch
+    print_message "Switching to main branch..."
+    git branch -M main
+    
+    # Prompt for new GitHub repository URL
+    echo -e "\n${BLUE}Enter your GitHub repository URL:${NC}"
+    echo "Example: https://github.com/username/my-blog.git"
+    read -p "> " repo_url
+    
+    if [ -z "$repo_url" ]; then
+        print_error "Repository URL is required!"
+    fi
+    
+    print_message "Adding your remote origin..."
+    git remote add origin "$repo_url"
+    
+    print_message "Pushing to GitHub..."
+    git push -u origin main
+    
+    cd ..
+    print_message "Blog created successfully!"
+    echo -e "\nYour blog is ready at: ${GREEN}$BLOG_DIR${NC}"
+}
+
+# NEW: Create a new blog entry
+cmd_new() {
+    local filename="$1"
+    
+    if [ -z "$filename" ]; then
+        print_error "Please provide a filename: git blog new <filename>"
+    fi
+    
+    # Add .md extension if not present
+    if [[ ! "$filename" =~ \.md$ ]]; then
+        filename="${filename}.md"
+    fi
+    
+    local filepath="$ENTRIES_DIR/$filename"
+    
+    if [ ! -d "$BLOG_DIR" ]; then
+        print_error "Blog doesn't exist! Run 'git blog start' first."
+    fi
+    
+    # Create entries directory if it doesn't exist
+    if [ ! -d "$ENTRIES_DIR" ]; then
+        mkdir -p "$ENTRIES_DIR"
+    fi
+    
+    if [ -f "$filepath" ]; then
+        print_error "File '$filename' already exists!"
+    fi
+    
+    print_message "Creating new entry: $filename"
+    
+    # Create file with basic template
+    cat > "$filepath" <<EOF
+---
+title: ""
+date: $(date +"%Y-%m-%d")
+tags: []
+author: 
+---
+EOF
+    
+    # Open in nano
+    nano "$filepath"
+    
+    print_message "Saving and pushing to GitHub..."
+    git_commit_push "Add new entry: $filename"
+    
+    print_message "Entry '$filename' created and pushed!"
+}
+
+# EDIT: Edit an existing blog entry
+cmd_edit() {
+    local filename="$1"
+    
+    if [ -z "$filename" ]; then
+        print_error "Please provide a filename: git blog edit <filename>"
+    fi
+    
+    # Add .md extension if not present
+    if [[ ! "$filename" =~ \.md$ ]]; then
+        filename="${filename}.md"
+    fi
+    
+    local filepath="$ENTRIES_DIR/$filename"
+    
+    if [ ! -d "$BLOG_DIR" ]; then
+        print_error "Blog doesn't exist! Run 'git blog start' first."
+    fi
+    
+    if [ ! -f "$filepath" ]; then
+        print_error "File '$filename' doesn't exist!"
+    fi
+    
+    print_message "Opening '$filename' for editing..."
+    
+    # Open in nano
+    nano "$filepath"
+    
+    print_message "Saving and pushing to GitHub..."
+    git_commit_push "Update entry: $filename"
+    
+    print_message "Entry '$filename' updated and pushed!"
+}
+
+# DELETE: Delete a blog entry
+cmd_delete() {
+    local filename="$1"
+    
+    if [ -z "$filename" ]; then
+        print_error "Please provide a filename: git blog delete <filename>"
+    fi
+    
+    # Add .md extension if not present
+    if [[ ! "$filename" =~ \.md$ ]]; then
+        filename="${filename}.md"
+    fi
+    
+    local filepath="$ENTRIES_DIR/$filename"
+    
+    if [ ! -d "$BLOG_DIR" ]; then
+        print_error "Blog doesn't exist! Run 'git blog start' first."
+    fi
+    
+    if [ ! -f "$filepath" ]; then
+        print_error "File '$filename' doesn't exist!"
+    fi
+    
+    # Confirm deletion
+    echo -e "${RED}Are you sure you want to delete '$filename'? (y/N)${NC}"
+    read -p "> " confirm
+    
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        echo "Deletion cancelled."
+        exit 0
+    fi
+    
+    print_message "Deleting '$filename'..."
+    rm "$filepath"
+    
+    print_message "Committing and pushing to GitHub..."
+    git_commit_push "Delete entry: $filename"
+    
+    print_message "Entry '$filename' deleted and pushed!"
+}
+
+# UPDATE: Push manual changes to GitHub
+cmd_update() {
+    if [ ! -d "$BLOG_DIR" ]; then
+        print_error "Blog doesn't exist! Run 'git blog start' first."
+    fi
+    
+    cd "$BLOG_DIR"
+    
+    # Check if there are any changes
+    if git diff-index --quiet HEAD --; then
+        print_message "No changes to push!"
+        cd ..
+        exit 0
+    fi
+    
+    print_message "Adding all changes..."
+    git add .
+    
+    # Show what's being committed
+    echo -e "\n${BLUE}Changes to be committed:${NC}"
+    git status --short
+    
+    echo -e "\n${BLUE}Enter commit message (or press Enter for default):${NC}"
+    read -p "> " commit_msg
+    
+    if [ -z "$commit_msg" ]; then
+        commit_msg="Update blog content"
+    fi
+    
+    print_message "Committing changes..."
+    git commit -m "$commit_msg"
+    
+    print_message "Pushing to GitHub..."
+    git push origin main
+    
+    cd ..
+    print_message "Blog updated and pushed successfully!"
+}
+
+# Main command dispatcher
+case "$1" in
+    start)
+        cmd_start
+        ;;
+    new)
+        cmd_new "$2"
+        ;;
+    edit)
+        cmd_edit "$2"
+        ;;
+    delete)
+        cmd_delete "$2"
+        ;;
+    update)
+        cmd_update
+        ;;
+    *)
+        echo "Usage: git blog [command]"
+        echo ""
+        echo "Commands:"
+        echo "  start              Initialize a new blog project"
+        echo "  new <filename>     Create a new blog entry"
+        echo "  edit <filename>    Edit an existing blog entry"
+        echo "  delete <filename>  Delete a blog entry"
+        echo "  update             Push manual changes to GitHub"
+        exit 1
+        ;;
+esac
+SCRIPT_EOF
+
+# Install the script
+sudo mv /tmp/git-blog /usr/local/bin/git-blog
+sudo chmod +x /usr/local/bin/git-blog
+
+# Success message
+echo -e "\033[0;32m✓\033[0m git-blog installed successfully!"
+echo ""
+echo "Usage:"
+echo "  git blog start              - Initialize a new blog project"
+echo "  git blog new <filename>     - Create a new blog entry"
+echo "  git blog edit <filename>    - Edit an existing blog entry"
+echo "  git blog delete <filename>  - Delete a blog entry"
+echo "  git blog update             - Push manual changes to GitHub"
+echo ""
+echo "Get started with: git blog start"
+
+INSTALLER_EOF
