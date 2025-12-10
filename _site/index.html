@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Felipe Dos Santos - Blog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900 text-slate-200">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <img src="https://i.sstatic.net/l60Hf.png" alt="Felipe Dos Santos" 
+                 class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-2 border-slate-700">
+            <h1 class="text-4xl font-bold mb-2">Felipe Dos Santos</h1>
+        </header>
+
+        <!-- Search and Filter -->
+        <div class="mb-8 space-y-4">
+            <div class="relative">
+                <input type="text" id="searchInput" 
+                       placeholder="Search entries..." 
+                       class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-600 text-slate-200">
+            </div>
+            <div class="flex flex-wrap gap-2" id="tagFilterContainer">
+                <button onclick="filterByTag('all')" 
+                        class="tag-filter active px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors">
+                    All
+                </button>
+                
+            </div>
+        </div>
+
+        <!-- Entries List -->
+        <div id="entriesList" class="space-y-4">
+            <!-- Entries will be populated by build script -->
+        </div>
+    </div>
+
+    <script>
+        let allEntries = [{"title":"Hello World","tags":[],"url":"entry-hello-world copy 2.html","content":"\ntags: introduction, welcome\n\nThis is my first blog entry! Welcome to my blog.\n\n## What is this?\n\nThis is a simple blogging engine powered by GitHub Actions.\n\n## Features\n\n- Markdown support\n- Tag fil"},{"title":"Hello World","tags":[],"url":"entry-hello-world copy 3.html","content":"\ntags: introduction, welcome\n\nThis is my first blog entry! Welcome to my blog.\n\n## What is this?\n\nThis is a simple blogging engine powered by GitHub Actions.\n\n## Features\n\n- Markdown support\n- Tag fil"},{"title":"Hello World","tags":[],"url":"entry-hello-world copy.html","content":"\ntags: introduction, welcome\n\nThis is my first blog entry! Welcome to my blog.\n\n## What is this?\n\nThis is a simple blogging engine powered by GitHub Actions.\n\n## Features\n\n- Markdown support\n- Tag fil"},{"title":"Hello World","tags":[],"url":"entry-hello-world.html","content":"\ntags: introduction, welcome\n\nThis is my first blog entry! Welcome to my blog.\n\n## What is this?\n\nThis is a simple blogging engine powered by GitHub Actions.\n\n## Features\n\n- Markdown support\n- Tag fil"}];
+        let currentFilter = 'all';
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            filterEntries(e.target.value, currentFilter);
+        });
+
+        // Tag filter functionality
+        function filterByTag(tag) {
+            currentFilter = tag;
+            document.querySelectorAll('.tag-filter').forEach(btn => {
+                btn.classList.remove('active', 'bg-slate-700');
+                btn.classList.add('bg-slate-800');
+            });
+            event.target.classList.add('active', 'bg-slate-700');
+            filterEntries(document.getElementById('searchInput').value, tag);
+        }
+
+        function filterEntries(searchTerm, tagFilter) {
+            const filtered = allEntries.filter(entry => {
+                const matchesSearch = entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    entry.content.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesTag = tagFilter === 'all' || entry.tags.includes(tagFilter);
+                return matchesSearch && matchesTag;
+            });
+
+            displayEntries(filtered);
+        }
+
+        function displayEntries(entries) {
+            const container = document.getElementById('entriesList');
+            if (entries.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-500 py-8">No entries found.</p>';
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => `
+                <a href="${entry.url}" class="block p-6 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-750 hover:border-slate-600 transition-colors">
+                    <h2 class="text-2xl font-semibold mb-2">${entry.title}</h2>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        ${entry.tags.map(tag => `
+                            <span class="px-3 py-1 bg-slate-700 text-slate-300 rounded-full text-sm">${tag}</span>
+                        `).join('')}
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        // Initial display
+        displayEntries(allEntries);
+    </script>
+</body>
+</html>
+
