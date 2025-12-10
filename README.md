@@ -28,7 +28,7 @@ Before installing the tools, you must configure a repository on GitHub to host y
 3.  Go to **Pages** > **Workflow Permissions**.
     > **Important:** Select **Read and Write permissions**. This is required for the action to publish your site.
 4.  Go to **Pages** > **Build and deployment**.
-5.  Under "Source", select **GitHub Actions**.
+5.  Under "Source", select **Deploy from a branch**, then **pages**.
 
 ### 2. Install the CLI Tool
 To use the custom `git blog` commands, you need to install the shell script.
