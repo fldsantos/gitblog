@@ -12,6 +12,7 @@
 * 🔍 **Search Functionality:** Built-in search for easy content navigation.
 * 🏷️ **Tag Filtering:** Organize posts with tags for better discoverability.
 * 🚀 **Auto-deploy:** Updates are automatically deployed to GitHub Pages.
+* 🌎 **Open Source And Customizable:** Shape your blog in any way you want.
 
 ---
 
